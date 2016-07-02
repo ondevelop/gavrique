@@ -1,3 +1,6 @@
 .gradle
 .idea
 out
+resources/audiofiles/*
+resources/db/*
+build
