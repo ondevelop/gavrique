@@ -1,7 +1,8 @@
 package ykt.ios4miui3.gavrique.db;
 
+import org.sqlite.SQLiteDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -10,16 +11,20 @@ import java.sql.Statement;
  */
 public class Db {
 
-    private static Connection connection;
+    private static SQLiteDataSource dataSource;
 
     public static void init() throws Exception {
         Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:resources/db/gavrique.db");
+        dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:resources/db/gavrique.db");
+        dataSource.getConnection().close();
         createTables();
     }
 
+
     private static void createTables() throws SQLException {
-        Statement stmt = connection.createStatement();
+        Connection c = getConnection();
+        Statement stmt = c.createStatement();
         String sql = "CREATE TABLE IF NOT EXISTS gav_files " +
                 "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                 " created           INTEGER   NOT NULL, " +
@@ -28,5 +33,21 @@ public class Db {
                 " path              CHAR(100) NOT NULL)";
         stmt.executeUpdate(sql);
         stmt.close();
+        closeConnection(c);
+    }
+
+    public static Connection getConnection() throws SQLException {
+        Connection conn = dataSource.getConnection();
+        return conn;
+    }
+
+    public static void closeConnection(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException ex) {
+                System.err.println("coonection free error " + ex);
+            }
+        }
     }
 }
