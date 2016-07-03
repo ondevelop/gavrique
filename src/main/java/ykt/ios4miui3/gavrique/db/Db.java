@@ -28,8 +28,8 @@ public class Db {
         String sql = "CREATE TABLE IF NOT EXISTS gav_files " +
                 "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                 " created           INTEGER   NOT NULL, " +
-                " author            INTEGER   NOT NULL, " +
-                " alias             CHAR(50)  NOT NULL, " +
+                " author            CHAR(50)   NOT NULL, " +
+                " alias             CHAR(50)  UNIQUE NOT NULL, " +
                 " path              CHAR(100) NOT NULL)";
         stmt.executeUpdate(sql);
         stmt.close();
