@@ -16,7 +16,7 @@ public class PlayerController implements Route {
     public Object handle(Request request, Response response) throws Exception {
         String alias = StringUtil.nonNull(request.params(":alias"));
         GavFile gavFile = GavFile.getByAlias(alias);
-        if (alias != null) {
+        if (gavFile != null) {
             AudioFilePlayer player = new AudioFilePlayer();
             player.play(Main.FILES_PATH + Main.PATH_SEPARATOR + gavFile.getPath());
         }
