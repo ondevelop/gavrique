@@ -3,6 +3,7 @@ package ykt.ios4miui3.gavrique;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Core.SparkServer;
 import ykt.ios4miui3.gavrique.db.Db;
+import ykt.ios4miui3.gavrique.threads.GavThreadScheduler;
 
 import java.io.File;
 
@@ -28,12 +29,15 @@ public class Main {
             Db.init();
             Logger.get().info("Db initialized");
 
+            Logger.get().info("Scheduler starting");
+            GavThreadScheduler.start();
+
+            Logger.get().info("Spark starting");
             SparkServer.run();
 
         } catch (Exception e) {
             Logger.get().error("server error", e);
         }
-        Logger.get().info("server is down");
     }
 
     private static void createDirs() throws SecurityException {
