@@ -1,9 +1,11 @@
 package ykt.ios4miui3.gavrique;
 
+import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Core.SparkServer;
 import ykt.ios4miui3.gavrique.db.Db;
 import ykt.ios4miui3.gavrique.threads.GavThreadScheduler;
+import ykt.ios4miui3.gavrique.utils.Net;
 
 import java.io.File;
 
@@ -15,6 +17,10 @@ public class Main {
     public static final String PATH_SEPARATOR = System.getProperties().getProperty("file.separator");
     public static final String RESOURCES_DIR_NAME = "resources";
     public static final String FILES_PATH = RESOURCES_DIR_NAME + PATH_SEPARATOR + "audiofiles";
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
+    private static String botName = "";
+    private static String botToken = "";
 
     public static void main(String[] args) {
 
@@ -24,6 +30,10 @@ public class Main {
         Logger.get().info("Logger initialized");
 
         try {
+            Logger.get().info("Check args");
+            initBot(args);
+            Logger.get().info("bot props is got");
+
             createDirs();
             Logger.get().info("Db initialization started");
             Db.init();
@@ -35,6 +45,7 @@ public class Main {
             Logger.get().info("Spark starting");
             SparkServer.run();
 
+            Logger.get().info(Bot.getResponse("getme"));
         } catch (Exception e) {
             Logger.get().error("server error", e);
         }
@@ -53,5 +64,24 @@ public class Main {
         if (!dirResources.exists()) {
             dirResources.mkdir();
         }
+    }
+
+    private static void initBot(String[] args) throws Exception {
+        if (args.length < 2) {
+            throw new Exception("args not found");
+        }
+        botName = args[0];
+        botToken = args[1];
+        if (botName.isEmpty() || botToken.isEmpty()) {
+            throw new Exception("args is empty");
+        }
+    }
+
+    public static String getBotName() {
+        return botName;
+    }
+
+    public static String getBotToken() {
+        return botToken;
     }
 }

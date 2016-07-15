@@ -16,6 +16,13 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = "ykt.ios4miui3.gavrique.Main"
 
+run {
+    systemProperties System.getProperties()
+    /* Need to split the space-delimited value in the exec.args */
+    args System.getProperty("exec_args").split()
+}
+
+
 sourceSets {
     main {
         java {

@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GavThreadScheduler {
-    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private static List<Task> tasks = new ArrayList<Task>() {{
         add(new Task(QueueManager::playFromQueue, 2));
     }};
