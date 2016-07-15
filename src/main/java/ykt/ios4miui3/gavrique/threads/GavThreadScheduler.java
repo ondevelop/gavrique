@@ -12,6 +12,7 @@ public class GavThreadScheduler {
     private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private static List<Task> tasks = new ArrayList<Task>() {{
         add(new Task(QueueManager::playFromQueue, 2));
+        add(new Task(BotUpdates::check, 3));
     }};
 
     public static void start() {
