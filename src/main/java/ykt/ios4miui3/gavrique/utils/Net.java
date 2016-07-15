@@ -1,11 +1,13 @@
 package ykt.ios4miui3.gavrique.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.server.Response;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -56,5 +58,17 @@ public class Net {
             }
         }
         return content;
+    }
+
+    public static boolean loadFile(String path, String dirPath, String fileName) {
+        try {
+            FileUtils.copyURLToFile(new URL(path), new File(dirPath + Main.PATH_SEPARATOR + fileName));
+            return true;
+        } catch (MalformedURLException e) {
+            Logger.get().error("Url error", e);
+        } catch (IOException e) {
+            Logger.get().error("File saving from url error", e);
+        }
+        return false;
     }
 }

@@ -11,14 +11,14 @@ import java.util.Map;
  */
 public class Bot {
 
-    private static final String apiUrl = "https://api.telegram.org";
+    public static final String API_URL = "https://api.telegram.org";
 
     public static String getResponse(String methodName) {
         return getResponse(methodName, new HashMap<>());
     }
 
     public static String getResponse(String methodName, HashMap<String, String> params) {
-        String url = apiUrl + "/bot" + Main.getBotToken() + "/" + methodName;
+        String url = API_URL + "/bot" + Main.getBotToken() + "/" + methodName;
         if (!params.isEmpty()) {
             url += "?";
             for (Map.Entry<String, String> entry : params.entrySet()) {
