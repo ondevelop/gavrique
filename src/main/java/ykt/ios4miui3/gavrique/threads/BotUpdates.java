@@ -10,7 +10,6 @@ import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.models.GavFile;
 import ykt.ios4miui3.gavrique.utils.Net;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -56,10 +55,16 @@ public class BotUpdates {
                 }
                 JsonElement text = message.get("text");
                 if (text != null) {
+                    String textString = text.getAsString().trim();
+                    if (textString.length() > 5 && textString.startsWith("play ")) {
+                        String alias = textString.substring(5);
+                        QueueManager.putToQueue(alias);
+                        continue;
+                    }
                     if (!authorVoices.containsKey(userName)) {
                         continue;
                     }
-                    String msg = text.getAsString().trim().toLowerCase();
+                    String msg = textString.toLowerCase();
                     int index = msg.indexOf("alias");
                     if (index == -1) {
                         continue;
@@ -106,7 +111,7 @@ public class BotUpdates {
         if (pathElement == null) {
             return;
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
         String fullPath = Bot.API_URL + "/file/bot" + Main.getBotToken() + "/" + pathElement.getAsString();
         if (Net.loadFile(fullPath, Main.FILES_PATH, fileName)) {
