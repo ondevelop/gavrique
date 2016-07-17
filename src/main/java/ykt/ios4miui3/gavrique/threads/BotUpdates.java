@@ -164,7 +164,7 @@ public class BotUpdates {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
         String fullPath = Bot.API_URL + "/file/bot" + Main.getBotToken() + "/" + pathElement.getAsString();
-        if (Net.loadFile(fullPath, Main.FILES_PATH + Main.PATH_SEPARATOR + fileName)) {
+        if (Net.saveUrl(fullPath, Main.FILES_PATH + Main.PATH_SEPARATOR + fileName)) {
             GavFile gavFile = GavFile.getByAlias(alias);
             if (gavFile == null) {
                 new GavFile(author, alias, fileName).save();

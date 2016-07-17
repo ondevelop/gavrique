@@ -6,13 +6,10 @@ import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by satisfaction on 15.07.16.
@@ -75,5 +72,44 @@ public class Net {
             Logger.get().error("File saving from url error", e);
         }
         return false;
+    }
+
+    public static boolean saveUrl(String urlString, String filename) {
+        BufferedInputStream in = null;
+        FileOutputStream fout = null;
+        boolean result = false;
+        try {
+            URLConnection conn = new URL(urlString).openConnection();
+            conn.setConnectTimeout(12000);
+            conn.setReadTimeout(12000);
+            in = new BufferedInputStream(conn.getInputStream());
+            fout = new FileOutputStream(filename);
+
+            byte data[] = new byte[1024];
+            int count;
+            while ((count = in.read(data, 0, 1024)) != -1) {
+                fout.write(data, 0, count);
+            }
+            fout.flush();
+            fout.close();
+            Logger.get().info("FileOutputStream have been flushed:" + filename);
+            result = true;
+        } catch (MalformedURLException e) {
+            Logger.get().error("Url error", e);
+        } catch (IOException e) {
+            Logger.get().error("File saving from url error", e);
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+                if (fout != null) {
+                    fout.close();
+                }
+            } catch (IOException e) {
+                Logger.get().error("File saving from url error", e);
+            }
+        }
+        return result;
     }
 }
