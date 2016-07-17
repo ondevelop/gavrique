@@ -1,6 +1,7 @@
 package ykt.ios4miui3.gavrique.models;
 
 import ykt.ios4miui3.gavrique.Core.Logger;
+import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.db.Db;
 
 import java.sql.*;
@@ -155,6 +156,10 @@ public class GavFile {
 
     public String getPath() {
         return path;
+    }
+
+    public String getFullPath() {
+        return Main.FILES_PATH + Main.PATH_SEPARATOR + path;
     }
 
     public void setPath(String path) {

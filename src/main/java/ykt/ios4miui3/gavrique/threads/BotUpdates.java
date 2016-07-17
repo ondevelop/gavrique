@@ -12,6 +12,7 @@ import ykt.ios4miui3.gavrique.models.GavFile;
 import ykt.ios4miui3.gavrique.models.PlayCommand;
 import ykt.ios4miui3.gavrique.utils.Net;
 
+import java.io.File;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +56,7 @@ public class BotUpdates {
                 }
 
                 JsonElement chatEl = message.getAsJsonObject().get("chat");
-                if (chatEl  == null) {
+                if (chatEl == null) {
                     Logger.get().error("There is no `chat`: " + item.toString());
                     continue;
                 }
@@ -93,6 +94,13 @@ public class BotUpdates {
                 JsonElement text = message.get("text");
                 if (text != null) {
                     String textString = text.getAsString().trim().toLowerCase();
+                    // help
+                    if (textString.startsWith("help") || textString.startsWith("/help")) {
+                        responseOfBot.setText(Bot.HELP_TEXT);
+                        QueueManager.putBotMsgToQueue(responseOfBot);
+                        continue;
+                    }
+                    // play command
                     if (textString.length() > 5 && (textString.startsWith("play ") || textString.startsWith("/play "))) {
                         String alias = textString.startsWith("play ") ? textString.substring(5) : textString.substring(6);
                         QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias.toLowerCase()));
@@ -111,7 +119,7 @@ public class BotUpdates {
                         continue;
                     }
                     if (loadAndSaveVoice(authorVoices.get(userName), alias, userName)) {
-                        responseOfBot.setText("Voice have been saved with the alias `" + alias + "`");
+                        responseOfBot.setText("Voice have been saved with the alias `" + alias + "`, you can play with command `/play " + alias + "`");
                     } else {
                         responseOfBot.setText("Can not load the voice, resend the voice");
                     }
@@ -151,7 +159,7 @@ public class BotUpdates {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
         String fullPath = Bot.API_URL + "/file/bot" + Main.getBotToken() + "/" + pathElement.getAsString();
-        if (Net.loadFile(fullPath, Main.FILES_PATH, fileName)) {
+        if (Net.loadFile(fullPath, Main.FILES_PATH + Main.PATH_SEPARATOR + fileName)) {
             GavFile gavFile = GavFile.getByAlias(alias);
             if (gavFile == null) {
                 new GavFile(author, alias, fileName).save();
@@ -160,8 +168,16 @@ public class BotUpdates {
                 gavFile.setCreated(new Date(new java.util.Date().getTime()));
                 gavFile.setPath(fileName);
                 gavFile.save();
+                //remove old file
+                try {
+                    File oldFile = new File(gavFile.getFullPath());
+                    oldFile.delete();
+                } catch (SecurityException e) {
+                    Logger.get().error("Can not delete file", e);
+                }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 }

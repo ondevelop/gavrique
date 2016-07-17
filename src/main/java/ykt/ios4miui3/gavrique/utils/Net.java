@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -62,9 +63,11 @@ public class Net {
         return content;
     }
 
-    public static boolean loadFile(String path, String dirPath, String fileName) {
+    public static boolean loadFile(String path, String filePath) {
         try {
-            FileUtils.copyURLToFile(new URL(path), new File(dirPath + Main.PATH_SEPARATOR + fileName));
+            File newFile = new File(filePath);
+            newFile.createNewFile();
+            FileUtils.copyURLToFile(new URL(path), newFile, 11000, 11000);
             return true;
         } catch (MalformedURLException e) {
             Logger.get().error("Url error", e);

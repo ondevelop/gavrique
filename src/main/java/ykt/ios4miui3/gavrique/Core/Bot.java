@@ -13,6 +13,9 @@ import java.util.Map;
  */
 public class Bot {
 
+    public static final String HELP_TEXT = "HOW TO SAVE VOICE: send voice, send alias of voice \n" +
+            "HOT TO PLAY: send `/play [alias]` in group or `play [alias]` in private chat";
+
     public static final String API_URL = "https://api.telegram.org";
 
     public static String getResponse(String methodName) {

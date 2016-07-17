@@ -69,8 +69,11 @@ public class QueueManager {
         }
         try {
             AudioMediaPlayerComponent playerComponent = new AudioMediaPlayerComponent();
-            playerComponent.getMediaPlayer().playMedia(Main.FILES_PATH + Main.PATH_SEPARATOR + gavFile.getPath());
-            botMsg.setText("[" + command.getAlias() + "] have been played");
+            if (playerComponent.getMediaPlayer().playMedia(gavFile.getFullPath())) {
+                botMsg.setText("[" + command.getAlias() + "] have been played");
+            } else {
+                throw new Exception("can not play source");
+            }
         } catch (Exception e) {
             Logger.get().error("Player error", e);
             botMsg.setText("[" + command.getAlias() + "], error have been happened when it is playing");
