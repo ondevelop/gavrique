@@ -35,11 +35,7 @@ public class QueueManager {
             return;
         }
         HashMap<String, String> params = new HashMap<>();
-        if (botMsg.getChatId() > -1) {
-            params.put("chat_id", String.valueOf(botMsg.getChatId()));
-        } else {
-            params.put("chat_id", "@" +  botMsg.getUserName());
-        }
+        params.put("chat_id", String.valueOf(botMsg.getChatId()));
         params.put("text", botMsg.getText());
         String response = Bot.getResponse("sendMessage", params);
         if (response == null) {

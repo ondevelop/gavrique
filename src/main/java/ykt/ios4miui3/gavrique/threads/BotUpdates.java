@@ -12,6 +12,7 @@ import ykt.ios4miui3.gavrique.models.GavFile;
 import ykt.ios4miui3.gavrique.models.PlayCommand;
 import ykt.ios4miui3.gavrique.utils.Net;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -39,30 +40,31 @@ public class BotUpdates {
                 throw new Exception("not ok json response");
             }
             JsonArray result = json.getAsJsonArray("result");
+            if (result != null && result.size() > 0) {
+                Logger.get().info("response: " + result.toString());
+            }
 
             for (JsonElement item : result) {
                 lastUpdateId = item.getAsJsonObject().get("update_id").getAsLong() + 1;
                 JsonObject message = item.getAsJsonObject().getAsJsonObject("message");
 
-                JsonElement messageEl = message.get("from");
-                if (messageEl == null) {
+                JsonElement fromEl = message.get("from");
+                if (fromEl == null) {
                     Logger.get().error("There is no `from`: " + message.toString());
                     continue;
                 }
 
-                long chatId = -1;
-                JsonElement chatEl = messageEl.getAsJsonObject().get("chat");
-                if (chatEl != null) {
-                    chatId = chatEl.getAsJsonObject().get("id").getAsLong();
+                JsonElement chatEl = message.getAsJsonObject().get("chat");
+                if (chatEl  == null) {
+                    Logger.get().error("There is no `chat`: " + item.toString());
+                    continue;
                 }
-                if (chatId == -1) {
-                    chatId = messageEl.getAsJsonObject().get("id").getAsLong();
-                }
+                long chatId = chatEl.getAsJsonObject().get("id").getAsLong();
 
                 BotMsg responseOfBot = new BotMsg();
                 responseOfBot.setChatId(chatId);
 
-                JsonElement usernameEl = messageEl.getAsJsonObject().get("username");
+                JsonElement usernameEl = fromEl.getAsJsonObject().get("username");
                 if (usernameEl == null) {
                     Logger.get().error("empty `username`: " + message.toString());
                     responseOfBot.setText("Username is a required");
@@ -116,7 +118,6 @@ public class BotUpdates {
                     authorVoices.remove(userName);
                     QueueManager.putBotMsgToQueue(responseOfBot);
                 }
-                Logger.get().info(userName + ": " + message);
             }
 
         } catch (Exception e) {
@@ -151,7 +152,15 @@ public class BotUpdates {
         String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
         String fullPath = Bot.API_URL + "/file/bot" + Main.getBotToken() + "/" + pathElement.getAsString();
         if (Net.loadFile(fullPath, Main.FILES_PATH, fileName)) {
-            new GavFile(author, alias, fileName).save();
+            GavFile gavFile = GavFile.getByAlias(alias);
+            if (gavFile == null) {
+                new GavFile(author, alias, fileName).save();
+            } else {
+                gavFile.setAuthor(author);
+                gavFile.setCreated(new Date(new java.util.Date().getTime()));
+                gavFile.setPath(fileName);
+                gavFile.save();
+            }
         }
         return true;
     }

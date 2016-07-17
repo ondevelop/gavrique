@@ -49,8 +49,9 @@ public class GavFile {
         Connection connection = null;
         try {
             connection = Db.getConnection();
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery("select id, created, author, path from gav_files WHERE alias='" + alias + "'");
+            PreparedStatement st = connection.prepareStatement("select id, created, author, path from gav_files WHERE alias=?");
+            st.setString(1, alias);
+            ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 GavFile gavFile = new GavFile(rs.getString(3), alias, rs.getString(4));
                 gavFile.setId(rs.getInt(1));

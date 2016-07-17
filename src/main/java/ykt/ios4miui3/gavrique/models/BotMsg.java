@@ -5,7 +5,7 @@ package ykt.ios4miui3.gavrique.models;
  */
 public class BotMsg {
 
-    private long chatId = -1;
+    private long chatId;
     private String userName;
     private String text;
 
