@@ -7,7 +7,9 @@ import com.google.gson.JsonParser;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
+import ykt.ios4miui3.gavrique.models.BotMsg;
 import ykt.ios4miui3.gavrique.models.GavFile;
+import ykt.ios4miui3.gavrique.models.PlayCommand;
 import ykt.ios4miui3.gavrique.utils.Net;
 
 import java.time.LocalDateTime;
@@ -37,48 +39,82 @@ public class BotUpdates {
                 throw new Exception("not ok json response");
             }
             JsonArray result = json.getAsJsonArray("result");
+
             for (JsonElement item : result) {
                 lastUpdateId = item.getAsJsonObject().get("update_id").getAsLong() + 1;
                 JsonObject message = item.getAsJsonObject().getAsJsonObject("message");
 
-                String userName = message.getAsJsonObject("from").get("username").getAsString();
+                JsonElement messageEl = message.get("from");
+                if (messageEl == null) {
+                    Logger.get().error("There is no `from`: " + message.toString());
+                    continue;
+                }
+
+                long chatId = -1;
+                JsonElement chatEl = messageEl.getAsJsonObject().get("chat");
+                if (chatEl != null) {
+                    chatId = chatEl.getAsJsonObject().get("id").getAsLong();
+                }
+                if (chatId == -1) {
+                    chatId = messageEl.getAsJsonObject().get("id").getAsLong();
+                }
+
+                BotMsg responseOfBot = new BotMsg();
+                responseOfBot.setChatId(chatId);
+
+                JsonElement usernameEl = messageEl.getAsJsonObject().get("username");
+                if (usernameEl == null) {
+                    Logger.get().error("empty `username`: " + message.toString());
+                    responseOfBot.setText("Username is a required");
+                    QueueManager.putBotMsgToQueue(responseOfBot);
+                    continue;
+                }
+
+                String userName = usernameEl.getAsString();
+                responseOfBot.setUserName(userName);
 
                 JsonObject voice = message.getAsJsonObject("voice");
                 if (voice != null) {
                     Logger.get().info("voice: " + voice);
                     int duration = voice.get("duration").getAsInt();
                     if (duration > 15) {
+                        responseOfBot.setText("To long duration: " + duration);
+                        QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
                     String fileId = voice.get("file_id").getAsString();
                     authorVoices.put(userName, fileId);
+                    responseOfBot.setText("Send me alias os the voice");
+                    QueueManager.putBotMsgToQueue(responseOfBot);
+                    continue;
                 }
                 JsonElement text = message.get("text");
                 if (text != null) {
-                    String textString = text.getAsString().trim();
-                    if (textString.length() > 5 && textString.startsWith("play ")) {
-                        String alias = textString.substring(5);
-                        QueueManager.putToQueue(alias);
+                    String textString = text.getAsString().trim().toLowerCase();
+                    if (textString.length() > 5 && (textString.startsWith("play ") || textString.startsWith("/play "))) {
+                        String alias = textString.startsWith("play ") ? textString.substring(5) : textString.substring(6);
+                        QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias.toLowerCase()));
                         continue;
                     }
+                    // alias, after voice msg
                     if (!authorVoices.containsKey(userName)) {
+                        responseOfBot.setText("Send me voice before to send alias");
+                        QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
-                    String msg = textString.toLowerCase();
-                    int index = msg.indexOf("alias");
-                    if (index == -1) {
+                    String alias = textString.toLowerCase();
+                    if (alias.contains(" ") || alias.contains("\\")) {
+                        responseOfBot.setText("Bad alias value, whitespace or `\\` in the alias");
+                        QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
-                    int equalIndex = msg.indexOf("=", index + 4);
-                    if (equalIndex == -1) {
-                        continue;
+                    if (loadAndSaveVoice(authorVoices.get(userName), alias, userName)) {
+                        responseOfBot.setText("Voice have been saved with the alias `" + alias + "`");
+                    } else {
+                        responseOfBot.setText("Can not load the voice, resend the voice");
                     }
-                    if (equalIndex >= msg.length() - 1) {
-                        continue;
-                    }
-                    String alias = msg.substring(equalIndex + 1).trim();
-                    loadAndSaveVoice(authorVoices.get(userName), alias, userName);
                     authorVoices.remove(userName);
+                    QueueManager.putBotMsgToQueue(responseOfBot);
                 }
                 Logger.get().info(userName + ": " + message);
             }
@@ -93,7 +129,7 @@ public class BotUpdates {
         }
     }
 
-    private static void loadAndSaveVoice(String fileId, String alias, String author) {
+    private static boolean loadAndSaveVoice(String fileId, String alias, String author) {
         String fileJson = Bot.getResponse("getfile", new HashMap<String, String>() {{
             put("file_id", fileId);
         }});
@@ -101,15 +137,15 @@ public class BotUpdates {
         JsonElement jsonResponse = parser.parse(fileJson);
         JsonElement ok = jsonResponse.getAsJsonObject().get("ok");
         if (ok == null || !ok.getAsString().equals("true")) {
-            return;
+            return false;
         }
         JsonObject result = jsonResponse.getAsJsonObject().getAsJsonObject("result");
         if (result == null) {
-            return;
+            return false;
         }
         JsonElement pathElement = result.get("file_path");
         if (pathElement == null) {
-            return;
+            return false;
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
         String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
@@ -117,5 +153,6 @@ public class BotUpdates {
         if (Net.loadFile(fullPath, Main.FILES_PATH, fileName)) {
             new GavFile(author, alias, fileName).save();
         }
+        return true;
     }
 }

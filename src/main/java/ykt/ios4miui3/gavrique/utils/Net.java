@@ -26,6 +26,8 @@ public class Net {
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             if (connection.getResponseCode() == Response.SC_OK) {
                 result = getContent(connection);
+            } else {
+                Logger.get().error("Request error for :" + urlString);
             }
         } catch (MalformedURLException e) {
             Logger.get().error("Url error", e);

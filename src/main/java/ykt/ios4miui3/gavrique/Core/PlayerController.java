@@ -4,6 +4,7 @@ import org.eclipse.jetty.util.StringUtil;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import ykt.ios4miui3.gavrique.models.PlayCommand;
 import ykt.ios4miui3.gavrique.threads.QueueManager;
 
 /**
@@ -16,7 +17,7 @@ public class PlayerController implements Route {
         if (alias.isEmpty()) {
             return new JsonResult("error", "alias is empty");
         }
-        QueueManager.putToQueue(alias);
+        QueueManager.putAliasToQueue(new PlayCommand(-1, null, alias));
         return new JsonResult("ok", "");
     }
 }

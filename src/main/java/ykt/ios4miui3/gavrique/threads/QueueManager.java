@@ -1,10 +1,16 @@
 package ykt.ios4miui3.gavrique.threads;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
+import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
+import ykt.ios4miui3.gavrique.models.BotMsg;
 import ykt.ios4miui3.gavrique.models.GavFile;
+import ykt.ios4miui3.gavrique.models.PlayCommand;
 
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -12,26 +18,67 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class QueueManager {
 
-    private static ConcurrentLinkedQueue<String> aliasQueue = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<PlayCommand> aliasQueue = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<BotMsg> botMsgs = new ConcurrentLinkedQueue<>();
 
-    public static boolean putToQueue(String alias) {
+    public static boolean putAliasToQueue(PlayCommand alias) {
         return aliasQueue.offer(alias);
     }
 
-    public static void playFromQueue() {
-        String alias = aliasQueue.poll();
-        if (alias == null) {
+    public static boolean putBotMsgToQueue(BotMsg botMsg) {
+        return botMsgs.offer(botMsg);
+    }
+
+    public static void sendFromQueue() {
+        BotMsg botMsg = botMsgs.poll();
+        if (botMsg == null || botMsg.getText() == null || (botMsg.getChatId() < 0 && botMsg.getUserName() == null)) {
             return;
         }
-        GavFile gavFile = GavFile.getByAlias(alias);
+        HashMap<String, String> params = new HashMap<>();
+        if (botMsg.getChatId() > -1) {
+            params.put("chat_id", String.valueOf(botMsg.getChatId()));
+        } else {
+            params.put("chat_id", "@" +  botMsg.getUserName());
+        }
+        params.put("text", botMsg.getText());
+        String response = Bot.getResponse("sendMessage", params);
+        if (response == null) {
+            Logger.get().error("null response for method sendMessage, params:" + params.toString());
+            return;
+        }
+        JsonParser parser = new JsonParser();
+        JsonElement responseJson = parser.parse(response);
+        if (responseJson.getAsJsonObject().get("ok") == null) {
+            Logger.get().error("There is no ok field in the response for method sendMessage, params:" + params.toString());
+            return;
+        }
+        if (!responseJson.getAsJsonObject().get("ok").getAsString().equals("true")) {
+            Logger.get().error("Not ok response for method sendMessage, params:" + params.toString());
+            return;
+        }
+        Logger.get().info("Msg send to chat_id:" + botMsg.getChatId() + ", msg:" + botMsg.getText());
+    }
+
+    public static void playFromQueue() {
+        PlayCommand command = aliasQueue.poll();
+        if (command == null) {
+            return;
+        }
+        BotMsg botMsg = new BotMsg(command.getChatId(), null, "");
+        GavFile gavFile = GavFile.getByAlias(command.getAlias());
         if (gavFile == null) {
+            botMsg.setText("Not existing alias");
+            QueueManager.putBotMsgToQueue(botMsg);
             return;
         }
         try {
             AudioMediaPlayerComponent playerComponent = new AudioMediaPlayerComponent();
             playerComponent.getMediaPlayer().playMedia(Main.FILES_PATH + Main.PATH_SEPARATOR + gavFile.getPath());
+            botMsg.setText("[" + command.getAlias() + "] have been played");
         } catch (Exception e) {
             Logger.get().error("Player error", e);
+            botMsg.setText("[" + command.getAlias() + "], error have been happened when it is playing");
         }
+        QueueManager.putBotMsgToQueue(botMsg);
     }
 }

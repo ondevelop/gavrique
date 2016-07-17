@@ -3,6 +3,8 @@ package ykt.ios4miui3.gavrique.Core;
 import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.utils.Net;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,11 @@ public class Bot {
         if (!params.isEmpty()) {
             url += "?";
             for (Map.Entry<String, String> entry : params.entrySet()) {
-                url += entry.getKey() + "=" + entry.getValue() + "&";
+                try {
+                    url += entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8") + "&";
+                } catch (UnsupportedEncodingException e) {
+                    Logger.get().error("Bad param value:" + entry.getValue());
+                }
             }
             url = url.substring(0, url.length() - 1);
         }
