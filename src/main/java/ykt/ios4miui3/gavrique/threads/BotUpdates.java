@@ -49,6 +49,11 @@ public class BotUpdates {
                 lastUpdateId = item.getAsJsonObject().get("update_id").getAsLong() + 1;
                 JsonObject message = item.getAsJsonObject().getAsJsonObject("message");
 
+                if (message == null) {
+                    Logger.get().error("There is no `message`: " + item.toString());
+                    continue;
+                }
+
                 JsonElement fromEl = message.get("from");
                 if (fromEl == null) {
                     Logger.get().error("There is no `from`: " + message.toString());

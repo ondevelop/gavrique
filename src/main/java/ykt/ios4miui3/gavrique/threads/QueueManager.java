@@ -31,7 +31,7 @@ public class QueueManager {
 
     public static void sendFromQueue() {
         BotMsg botMsg = botMsgs.poll();
-        if (botMsg == null || botMsg.getText() == null || (botMsg.getChatId() < 0 && botMsg.getUserName() == null)) {
+        if (botMsg == null || botMsg.getText() == null) {
             return;
         }
         HashMap<String, String> params = new HashMap<>();
