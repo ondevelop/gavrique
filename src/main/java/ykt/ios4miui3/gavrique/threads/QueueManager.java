@@ -1,9 +1,9 @@
 package ykt.ios4miui3.gavrique.threads;
 
+import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.models.GavFile;
-import ykt.ios4miui3.gavrique.utils.AudioFilePlayer;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -28,9 +28,9 @@ public class QueueManager {
             return;
         }
         try {
-            AudioFilePlayer player = new AudioFilePlayer();
-            player.play(Main.FILES_PATH + Main.PATH_SEPARATOR + gavFile.getPath());
-        } catch (IllegalStateException e) {
+            AudioMediaPlayerComponent playerComponent = new AudioMediaPlayerComponent();
+            playerComponent.getMediaPlayer().playMedia(Main.FILES_PATH + Main.PATH_SEPARATOR + gavFile.getPath());
+        } catch (Exception e) {
             Logger.get().error("Player error", e);
         }
     }

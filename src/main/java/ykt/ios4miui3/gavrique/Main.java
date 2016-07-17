@@ -1,5 +1,7 @@
 package ykt.ios4miui3.gavrique;
 
+import uk.co.caprica.vlcj.binding.LibVlc;
+import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Core.SparkServer;
@@ -23,6 +25,10 @@ public class Main {
     private static String botToken = "";
 
     public static void main(String[] args) {
+
+        boolean found = new NativeDiscovery().discover();
+        System.out.println(found);
+        System.out.println(LibVlc.INSTANCE.libvlc_get_version());
 
         System.out.println("server starting");
 
