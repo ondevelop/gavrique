@@ -169,10 +169,6 @@ public class BotUpdates {
             if (gavFile == null) {
                 new GavFile(author, alias, fileName).save();
             } else {
-                gavFile.setAuthor(author);
-                gavFile.setCreated(new Date(new java.util.Date().getTime()));
-                gavFile.setPath(fileName);
-                gavFile.save();
                 //remove old file
                 try {
                     File oldFile = new File(gavFile.getFullPath());
@@ -180,6 +176,11 @@ public class BotUpdates {
                 } catch (SecurityException e) {
                     Logger.get().error("Can not delete file", e);
                 }
+
+                gavFile.setAuthor(author);
+                gavFile.setCreated(new Date(new java.util.Date().getTime()));
+                gavFile.setPath(fileName);
+                gavFile.save();
             }
             return true;
         }
