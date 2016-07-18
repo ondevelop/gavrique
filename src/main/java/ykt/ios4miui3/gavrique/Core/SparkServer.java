@@ -8,7 +8,7 @@ import spark.Spark;
 public class SparkServer {
 
     public static void run() {
-        Spark.port(8081);
+        Spark.port(9090);
         Spark.get("/", (request, response) -> "ok");
         Spark.get("/api/play/:alias", "application/json", new PlayerController(), new JsonTransformer());
     }
