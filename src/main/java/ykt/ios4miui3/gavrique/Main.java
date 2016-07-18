@@ -26,16 +26,19 @@ public class Main {
 
     public static void main(String[] args) {
 
-        boolean found = new NativeDiscovery().discover();
-        System.out.println(found);
-        System.out.println(LibVlc.INSTANCE.libvlc_get_version());
-
         System.out.println("server starting");
 
         Logger.init();
         Logger.get().info("Logger initialized");
 
         try {
+            Logger.get().info("search vlc libs in os");
+            if (!new NativeDiscovery().discover()) {
+                Logger.get().error("There is no vlc libs in this os, install VLC player");
+                return;
+            }
+            Logger.get().info("Libs have been find: " + LibVlc.INSTANCE.libvlc_get_version());
+
             Logger.get().info("Check args");
             initBot(args);
             Logger.get().info("bot props is got");
