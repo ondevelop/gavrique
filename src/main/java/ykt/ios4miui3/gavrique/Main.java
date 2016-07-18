@@ -51,8 +51,10 @@ public class Main {
             Logger.get().info("Scheduler starting");
             GavThreadScheduler.start();
 
+            /* not need now
             Logger.get().info("Spark starting");
             SparkServer.run();
+            */
 
             Logger.get().info(Bot.getResponse("getme"));
         } catch (Exception e) {
