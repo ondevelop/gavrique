@@ -17,6 +17,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by satisfaction on 15.07.16.
@@ -102,6 +103,20 @@ public class BotUpdates {
                     // help
                     if (textString.startsWith("help") || textString.startsWith("/help")) {
                         responseOfBot.setText(Bot.HELP_TEXT);
+                        QueueManager.putBotMsgToQueue(responseOfBot);
+                        continue;
+                    }
+                    // alias list
+                    if (textString.startsWith("list") || textString.startsWith("/list")) {
+                        List<GavFile> list = GavFile.list();
+                        String aliasList = "aliases: ";
+                        for (GavFile gavFile : list) {
+                            aliasList += gavFile.getAlias() + ", ";
+                        }
+                        if (aliasList.length() > 2) {
+                            aliasList = aliasList.substring(0, aliasList.length() - 2);
+                        }
+                        responseOfBot.setText(aliasList);
                         QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
