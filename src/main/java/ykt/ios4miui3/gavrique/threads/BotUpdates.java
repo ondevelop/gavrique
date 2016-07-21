@@ -109,9 +109,9 @@ public class BotUpdates {
                     // alias list
                     if (textString.startsWith("list") || textString.startsWith("/list")) {
                         List<GavFile> list = GavFile.list();
-                        String aliasList = "aliases: ";
+                        String aliasList = "commands: ";
                         for (GavFile gavFile : list) {
-                            aliasList += gavFile.getAlias() + ", ";
+                            aliasList += "/play" + gavFile.getAlias() + ", ";
                         }
                         if (aliasList.length() > 2) {
                             aliasList = aliasList.substring(0, aliasList.length() - 2);
@@ -121,14 +121,14 @@ public class BotUpdates {
                         continue;
                     }
                     // play command
-                    if (textString.length() > 5 && (textString.startsWith("play ") || textString.startsWith("/play "))) {
-                        String alias = textString.startsWith("play ") ? textString.substring(5) : textString.substring(6);
+                    if (textString.length() > 5 && (textString.startsWith("play") || textString.startsWith("/play"))) {
+                        String alias = textString.startsWith("play") ? textString.substring(4) : textString.substring(5);
                         QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias.toLowerCase()));
                         continue;
                     }
                     // alias, after voice msg
                     if (!authorVoices.containsKey(userName)) {
-                        responseOfBot.setText("Send me voice before to send alias");
+                        responseOfBot.setText("Send me voice before to send alias, /help");
                         QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
@@ -139,7 +139,7 @@ public class BotUpdates {
                         continue;
                     }
                     if (loadAndSaveVoice(authorVoices.get(userName), alias, userName)) {
-                        responseOfBot.setText("Voice have been saved with the alias `" + alias + "`, you can play with command `/play " + alias + "`");
+                        responseOfBot.setText("Voice have been saved with the alias `" + alias + "`, you can play with command `/play" + alias + "` or `/play " + alias + "`");
                     } else {
                         responseOfBot.setText("Can not load the voice, resend the voice");
                     }

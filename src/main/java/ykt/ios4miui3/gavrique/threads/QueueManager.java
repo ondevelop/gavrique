@@ -70,7 +70,7 @@ public class QueueManager {
         try {
             AudioMediaPlayerComponent playerComponent = new AudioMediaPlayerComponent();
             if (playerComponent.getMediaPlayer().playMedia(gavFile.getFullPath())) {
-                botMsg.setText("[" + command.getAlias() + "] have been played");
+                botMsg.setText("[" + command.getAlias() + "] is being played");
             } else {
                 throw new Exception("can not play source");
             }
