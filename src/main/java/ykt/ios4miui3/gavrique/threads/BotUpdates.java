@@ -121,9 +121,14 @@ public class BotUpdates {
                         continue;
                     }
                     // play command
-                    if (textString.length() > 5 && (textString.startsWith("play") || textString.startsWith("/play"))) {
+                    if ((textString.startsWith("play") && textString.length() > 4) || (textString.length() > 5 && textString.startsWith("/play"))) {
                         String alias = textString.startsWith("play") ? textString.substring(4) : textString.substring(5);
                         QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias.toLowerCase()));
+                        continue;
+                    }
+                    if (textString.startsWith("/") || textString.equals("play")) {
+                        responseOfBot.setText("Incorrect command, /help");
+                        QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
                     // alias, after voice msg
