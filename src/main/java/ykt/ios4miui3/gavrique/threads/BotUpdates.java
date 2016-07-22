@@ -123,7 +123,11 @@ public class BotUpdates {
                     // play command
                     if ((textString.startsWith("play") && textString.length() > 4) || (textString.length() > 5 && textString.startsWith("/play"))) {
                         String alias = textString.startsWith("play") ? textString.substring(4) : textString.substring(5);
-                        QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias.toLowerCase()));
+                        int index = alias.indexOf("@");
+                        if (index != -1) {
+                            alias = alias.substring(0, index);
+                        }
+                        QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias));
                         continue;
                     }
                     if (textString.startsWith("/") || textString.equals("play")) {
@@ -138,8 +142,8 @@ public class BotUpdates {
                         continue;
                     }
                     String alias = textString.toLowerCase();
-                    if (alias.contains(" ") || alias.contains("\\")) {
-                        responseOfBot.setText("Bad alias value, whitespace or `\\` in the alias");
+                    if (alias.contains(" ") || alias.contains("\\") || alias.contains("@")) {
+                        responseOfBot.setText("Bad alias value, whitespace, @ or `\\` in the alias");
                         QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
