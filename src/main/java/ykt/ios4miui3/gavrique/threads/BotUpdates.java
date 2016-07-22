@@ -122,7 +122,7 @@ public class BotUpdates {
                     }
                     // play command
                     if ((textString.startsWith("play") && textString.length() > 4) || (textString.length() > 5 && textString.startsWith("/play"))) {
-                        String alias = textString.startsWith("play") ? textString.substring(4) : textString.substring(5);
+                        String alias = textString.startsWith("play") ? textString.substring(4).trim() : textString.substring(5).trim();
                         int index = alias.indexOf("@");
                         if (index != -1) {
                             alias = alias.substring(0, index);
