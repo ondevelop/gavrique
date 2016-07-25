@@ -122,6 +122,23 @@ public class GavFile {
         }
     }
 
+    public void remove() {
+        Connection connection = null;
+        try {
+            connection = Db.getConnection();
+            if (id > 0) {
+                PreparedStatement st = connection.prepareStatement("DELETE FROM gav_files where alias=?");
+                st.setString(1, alias);
+                st.executeUpdate();
+                st.close();
+            }
+        } catch (SQLException e) {
+            Logger.get().error("remove error", e);
+        } finally {
+            Db.closeConnection(connection);
+        }
+    }
+
     public int getId() {
         return id;
     }

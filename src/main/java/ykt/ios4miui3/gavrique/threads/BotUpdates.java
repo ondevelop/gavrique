@@ -4,14 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.models.BotMsg;
 import ykt.ios4miui3.gavrique.models.GavFile;
-import ykt.ios4miui3.gavrique.models.PlayCommand;
+import ykt.ios4miui3.gavrique.models.Command;
 import ykt.ios4miui3.gavrique.utils.Net;
 
 import java.io.File;
@@ -127,6 +126,12 @@ public class BotUpdates {
                         QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
+                    // remove command
+                    if (textString.length() > 8 && textString.startsWith("/remove ")) {
+                        String alias = textString.substring(8, textString.length()).trim();
+                        QueueManager.putAliasToQueue(Command.createRemoveCommand(chatId, userName, alias));
+                        continue;
+                    }
                     // play command
                     if ((textString.startsWith("play") && textString.length() > 4) || (textString.length() > 5 && textString.startsWith("/play"))) {
                         String alias = textString.startsWith("play") ? textString.substring(4).trim() : textString.substring(5).trim();
@@ -134,7 +139,7 @@ public class BotUpdates {
                         if (index != -1) {
                             alias = alias.substring(0, index);
                         }
-                        QueueManager.putAliasToQueue(new PlayCommand(chatId, userName, alias));
+                        QueueManager.putAliasToQueue(new Command(chatId, userName, alias));
                         continue;
                     }
                     if (textString.startsWith("/") || textString.equals("play")) {

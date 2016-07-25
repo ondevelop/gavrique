@@ -12,7 +12,7 @@ public class GavThreadScheduler {
     private static final int MAX_THREADS = 5;
     private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(MAX_THREADS);
     private static List<Task> tasks = new ArrayList<Task>() {{
-        add(new Task(QueueManager::playFromQueue, 2));
+        add(new Task(QueueManager::executeCommandFromQueue, 2));
         add(new Task(QueueManager::sendFromQueue, 1));
         add(new Task(BotUpdates::check, 2));
     }};

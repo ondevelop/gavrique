@@ -2,14 +2,17 @@ package ykt.ios4miui3.gavrique.threads;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.apache.commons.io.FileUtils;
 import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
-import ykt.ios4miui3.gavrique.Main;
 import ykt.ios4miui3.gavrique.models.BotMsg;
 import ykt.ios4miui3.gavrique.models.GavFile;
-import ykt.ios4miui3.gavrique.models.PlayCommand;
+import ykt.ios4miui3.gavrique.models.Command;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -18,10 +21,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class QueueManager {
 
-    private static ConcurrentLinkedQueue<PlayCommand> aliasQueue = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<Command> aliasQueue = new ConcurrentLinkedQueue<>();
     private static ConcurrentLinkedQueue<BotMsg> botMsgs = new ConcurrentLinkedQueue<>();
 
-    public static boolean putAliasToQueue(PlayCommand alias) {
+    public static boolean putAliasToQueue(Command alias) {
         return aliasQueue.offer(alias);
     }
 
@@ -55,8 +58,8 @@ public class QueueManager {
         Logger.get().info("Msg send to chat_id:" + botMsg.getChatId() + ", msg:" + botMsg.getText());
     }
 
-    public static void playFromQueue() {
-        PlayCommand command = aliasQueue.poll();
+    public static void executeCommandFromQueue() {
+        Command command = aliasQueue.poll();
         if (command == null) {
             return;
         }
@@ -64,6 +67,17 @@ public class QueueManager {
         GavFile gavFile = GavFile.getByAlias(command.getAlias());
         if (gavFile == null) {
             botMsg.setText("Not existing alias");
+            QueueManager.putBotMsgToQueue(botMsg);
+            return;
+        }
+        if (command.isRemove()) {
+            try {
+                FileUtils.forceDelete(new File(gavFile.getFullPath()));
+                gavFile.remove();
+            } catch (IOException e) {
+                Logger.get().error("File of alias '" + command.getAlias() + "' not found: " + gavFile.getFullPath());
+            }
+            botMsg.setText("[" + command.getAlias() + "] have been removed");
             QueueManager.putBotMsgToQueue(botMsg);
             return;
         }
