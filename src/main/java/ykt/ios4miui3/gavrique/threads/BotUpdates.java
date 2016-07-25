@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
@@ -82,18 +84,23 @@ public class BotUpdates {
                 String userName = usernameEl.getAsString();
                 responseOfBot.setUserName(userName);
 
-                JsonObject voice = message.getAsJsonObject("voice");
-                if (voice != null) {
-                    Logger.get().info("voice: " + voice);
-                    int duration = voice.get("duration").getAsInt();
+                JsonObject audioFile = message.getAsJsonObject("voice");
+                String audioType = "voice";
+                if (audioFile == null) {
+                    audioFile = message.getAsJsonObject("audio");
+                    audioType = "audio";
+                }
+                if (audioFile != null) {
+                    Logger.get().info(audioType + ": " + audioFile);
+                    int duration = audioFile.get("duration").getAsInt();
                     if (duration > 15) {
                         responseOfBot.setText("To long duration: " + duration);
                         QueueManager.putBotMsgToQueue(responseOfBot);
                         continue;
                     }
-                    String fileId = voice.get("file_id").getAsString();
+                    String fileId = audioFile.get("file_id").getAsString();
                     authorVoices.put(userName, fileId);
-                    responseOfBot.setText("Send me alias os the voice");
+                    responseOfBot.setText("Send me alias of the voice");
                     QueueManager.putBotMsgToQueue(responseOfBot);
                     continue;
                 }
@@ -185,8 +192,9 @@ public class BotUpdates {
         if (pathElement == null) {
             return false;
         }
+        String fileExtension = FilenameUtils.getExtension(pathElement.getAsString());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-        String fileName = LocalDateTime.now().format(formatter) + author + ".ogg";
+        String fileName = LocalDateTime.now().format(formatter) + author + (!fileExtension.isEmpty() ? "." + fileExtension : "");
         String fullPath = Bot.API_URL + "/file/bot" + Main.getBotToken() + "/" + pathElement.getAsString();
         if (Net.saveUrl(fullPath, Main.FILES_PATH + Main.PATH_SEPARATOR + fileName)) {
             GavFile gavFile = GavFile.getByAlias(alias);
