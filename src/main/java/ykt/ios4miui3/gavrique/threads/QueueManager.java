@@ -73,9 +73,10 @@ public class QueueManager {
         if (command.isRemove()) {
             try {
                 FileUtils.forceDelete(new File(gavFile.getFullPath()));
-                gavFile.remove();
             } catch (IOException e) {
                 Logger.get().error("File of alias '" + command.getAlias() + "' not found: " + gavFile.getFullPath());
+            } finally {
+                gavFile.remove();
             }
             botMsg.setText("[" + command.getAlias() + "] have been removed");
             QueueManager.putBotMsgToQueue(botMsg);
