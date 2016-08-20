@@ -23,15 +23,23 @@ import java.util.List;
 /**
  * Created by satisfaction on 15.07.16.
  */
-public class BotUpdates {
+public class BotUpdates implements Runnable{
     private static long lastUpdateId = 0;
 
     private static HashMap<String, String> authorVoices = new HashMap<>();
+
+    @Override
+    public void run() {
+        while(true) {
+            check();
+        }
+    }
 
     public static void check() {
         try {
             HashMap<String, String> params = new HashMap<>();
             params.put("offset", "" + lastUpdateId);
+            params.put("timeout","" + 20);
             String response = Bot.getResponse("getupdates", params);
             if (response == null || response.isEmpty()) {
                 throw new Exception("null response");
@@ -129,7 +137,7 @@ public class BotUpdates {
                     // remove command
                     if (textString.length() > 8 && textString.startsWith("/remove ")) {
                         String alias = textString.substring(8, textString.length()).trim();
-                        QueueManager.putAliasToQueue(Command.createRemoveCommand(chatId, userName, alias));
+                        QueueManager.putMessageToQueue(Command.createRemoveCommand(chatId, userName, alias));
                         continue;
                     }
                     // play command
@@ -139,7 +147,7 @@ public class BotUpdates {
                         if (index != -1) {
                             alias = alias.substring(0, index);
                         }
-                        QueueManager.putAliasToQueue(new Command(chatId, userName, alias));
+                        QueueManager.putMessageToQueue(new Command(chatId, userName, alias));
                         continue;
                     }
                     if (textString.startsWith("/") || textString.equals("play")) {
@@ -171,11 +179,6 @@ public class BotUpdates {
 
         } catch (Exception e) {
             Logger.get().error("bot error", e);
-            try {
-                Thread.sleep(20000);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
         }
     }
 

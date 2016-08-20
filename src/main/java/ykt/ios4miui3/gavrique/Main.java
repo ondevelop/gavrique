@@ -4,10 +4,8 @@ import uk.co.caprica.vlcj.binding.LibVlc;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
-import ykt.ios4miui3.gavrique.Core.SparkServer;
 import ykt.ios4miui3.gavrique.db.Db;
-import ykt.ios4miui3.gavrique.threads.GavThreadScheduler;
-import ykt.ios4miui3.gavrique.utils.Net;
+import ykt.ios4miui3.gavrique.threads.QueueManager;
 
 import java.io.File;
 
@@ -49,7 +47,7 @@ public class Main {
             Logger.get().info("Db initialized");
 
             Logger.get().info("Scheduler starting");
-            GavThreadScheduler.start();
+            QueueManager.start();
 
             /* not need now
             Logger.get().info("Spark starting");

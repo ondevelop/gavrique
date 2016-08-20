@@ -17,7 +17,7 @@ public class PlayerController implements Route {
         if (alias.isEmpty()) {
             return new JsonResult("error", "alias is empty");
         }
-        QueueManager.putAliasToQueue(new Command(-1, null, alias));
+        QueueManager.putMessageToQueue(new Command(-1, null, alias));
         return new JsonResult("ok", "");
     }
 }
