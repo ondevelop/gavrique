@@ -5,10 +5,15 @@ import org.apache.commons.io.FilenameUtils;
 import ykt.ios4miui3.gavrique.Core.Bot;
 import ykt.ios4miui3.gavrique.Core.Logger;
 import ykt.ios4miui3.gavrique.Main;
-import ykt.ios4miui3.gavrique.models.BotMsg;
 import ykt.ios4miui3.gavrique.models.Command;
 import ykt.ios4miui3.gavrique.models.GavFile;
+import ykt.ios4miui3.gavrique.models.Telegram.Inline.AnswerInlineQuery;
+import ykt.ios4miui3.gavrique.models.Telegram.Inline.InlineQueryResult;
+import ykt.ios4miui3.gavrique.models.Telegram.Inline.InlineQueryResultArticle;
+import ykt.ios4miui3.gavrique.models.Telegram.Inline.InputTextMessageContent;
+import ykt.ios4miui3.gavrique.models.Telegram.InlineQuery;
 import ykt.ios4miui3.gavrique.models.Telegram.Message;
+import ykt.ios4miui3.gavrique.models.Telegram.SendMessage;
 import ykt.ios4miui3.gavrique.models.Telegram.Update;
 import ykt.ios4miui3.gavrique.utils.Net;
 
@@ -85,12 +90,12 @@ public class UpdateHandler implements Runnable {
             JsonObject object;
             try {
                 object = item.getAsJsonObject();
+                Gson gson = new Gson();
 
                 if (object.get("message") != null) {
                     Update<Message> update = new Update<>();
                     update.setUpdate_id(object.get("update_id").getAsLong());
 
-                    Gson gson = new Gson();
                     Message message = gson.fromJson(object.get("message"), Message.class);
 
                     update.setOptional(message);
@@ -98,6 +103,21 @@ public class UpdateHandler implements Runnable {
                     if (update.getUpdate_id() >= BotUpdates.lastUpdateId.get()) {
                         updates.add(update);
                     }
+                    continue;
+                }
+
+                if (object.get("inline_query") != null) {
+                    Update<InlineQuery> update = new Update<>();
+                    update.setUpdate_id(object.get("update_id").getAsLong());
+
+                    InlineQuery inlineQuery = gson.fromJson(object.get("inline_query"), InlineQuery.class);
+
+                    update.setOptional(inlineQuery);
+
+                    if (update.getUpdate_id() >= BotUpdates.lastUpdateId.get()) {
+                        updates.add(update);
+                    }
+                    continue;
                 }
             }
             catch (IllegalStateException | ClassCastException e) {
@@ -110,11 +130,12 @@ public class UpdateHandler implements Runnable {
 
     public void handle(List<Update> updates) {
         for (Update update : updates) {
-            BotMsg responseOfBot = new BotMsg();
-
             BotUpdates.lastUpdateId.set(update.getUpdate_id() + 1);
 
+            // message
             if (update.getOptional() instanceof Message) {
+                SendMessage responseOfBot = new SendMessage();
+
                 Message message = (Message) update.getOptional();
 
                 responseOfBot.setChatId(message.getChat().getId());
@@ -216,6 +237,29 @@ public class UpdateHandler implements Runnable {
                         authorVoices.remove(message.getFrom().getUsername());
                         QueueManager.putBotMsgToResponseQueue(responseOfBot);
                 }
+                // inline query
+            }else if (update.getOptional() instanceof InlineQuery){
+                InlineQuery inlineQuery = (InlineQuery) update.getOptional();
+
+                AnswerInlineQuery answerInlineQuery = new AnswerInlineQuery();
+
+                List<GavFile> gavFiles = GavFile.searchByAlias(inlineQuery.getQuery());
+
+                List<InlineQueryResult> results = new ArrayList<>();
+
+                for (GavFile gavFile : gavFiles) {
+                    InlineQueryResultArticle inlineQueryResult = new InlineQueryResultArticle<InputTextMessageContent>();
+                    inlineQueryResult.setId(String.valueOf(gavFile.getId()));
+                    inlineQueryResult.setTitle("/play " + gavFile.getAlias());
+                    inlineQueryResult.setInput_message_content(new InputTextMessageContent("/play " + gavFile.getAlias()));
+
+                    results.add(inlineQueryResult);
+                }
+
+                answerInlineQuery.setInline_query_id(inlineQuery.getId());
+                answerInlineQuery.setResults(results);
+
+                QueueManager.putBotMsgToResponseQueue(answerInlineQuery);
             }
         }
     }

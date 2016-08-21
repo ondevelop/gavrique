@@ -1,6 +1,6 @@
 package ykt.ios4miui3.gavrique.threads;
 
-import ykt.ios4miui3.gavrique.models.BotMsg;
+import ykt.ios4miui3.gavrique.models.BotMessage;
 import ykt.ios4miui3.gavrique.models.Command;
 
 import java.util.concurrent.BlockingQueue;
@@ -12,7 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class QueueManager {
 
     private static BlockingQueue<Command> playQueue;
-    private static BlockingQueue<BotMsg> responseQueue;
+    private static BlockingQueue<BotMessage> responseQueue;
     private static BlockingQueue<String> updatesQueue;
 
     public static void start() {
@@ -38,9 +38,9 @@ public class QueueManager {
         }
     }
 
-    public static void putBotMsgToResponseQueue(BotMsg botMsg) {
+    public static void putBotMsgToResponseQueue(BotMessage botMessage) {
         try {
-            responseQueue.put(botMsg);
+            responseQueue.put(botMessage);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

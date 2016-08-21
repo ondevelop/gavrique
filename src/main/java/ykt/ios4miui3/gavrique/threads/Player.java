@@ -6,9 +6,10 @@ import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.list.MediaListPlayer;
 import uk.co.caprica.vlcj.player.list.MediaListPlayerMode;
 import ykt.ios4miui3.gavrique.Core.Logger;
-import ykt.ios4miui3.gavrique.models.BotMsg;
+import ykt.ios4miui3.gavrique.models.BotMessage;
 import ykt.ios4miui3.gavrique.models.Command;
 import ykt.ios4miui3.gavrique.models.GavFile;
+import ykt.ios4miui3.gavrique.models.Telegram.SendMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,11 +53,11 @@ public class Player implements Runnable {
             return;
         }
 
-        BotMsg botMsg = new BotMsg(command.getChatId(), null, "");
+        SendMessage botMessage = new SendMessage(command.getChatId(), null, "");
         GavFile gavFile = GavFile.getByAlias(command.getAlias());
         if (gavFile == null) {
-            botMsg.setText("Not existing alias");
-            QueueManager.putBotMsgToResponseQueue(botMsg);
+            botMessage.setText("Not existing alias");
+            QueueManager.putBotMsgToResponseQueue(botMessage);
             return;
         }
         if (command.isRemove()) {
@@ -67,16 +68,16 @@ public class Player implements Runnable {
             } finally {
                 gavFile.remove();
             }
-            botMsg.setText("[" + command.getAlias() + "] have been removed");
-            QueueManager.putBotMsgToResponseQueue(botMsg);
+            botMessage.setText("[" + command.getAlias() + "] have been removed");
+            QueueManager.putBotMsgToResponseQueue(botMessage);
             return;
         }
         try {
             /*MediaListPlayerEventAdapter listPlayerEventAdapter = new MediaListPlayerEventAdapter(){
                 @Override
                 public void nextItem(MediaListPlayer mediaListPlayer, libvlc_media_t item, String itemMrl) {
-                    botMsg.setText("[" + command.getAlias() + "] is being played");
-                    QueueManager.putBotMsgToResponseQueue(botMsg);
+                    botMessage.setText("[" + command.getAlias() + "] is being played");
+                    QueueManager.putBotMsgToResponseQueue(botMessage);
                 }
             };
 
@@ -93,12 +94,12 @@ public class Player implements Runnable {
                 this.mediaListPlayer.play();
             }
 
-            botMsg.setText("[" + command.getAlias() + "] is being played");
-            QueueManager.putBotMsgToResponseQueue(botMsg);
+            botMessage.setText("[" + command.getAlias() + "] is being played");
+            QueueManager.putBotMsgToResponseQueue(botMessage);
         } catch (Exception e) {
             Logger.get().error("Player error", e);
-            botMsg.setText("[" + command.getAlias() + "], error have been happened when it is playing");
-            QueueManager.putBotMsgToResponseQueue(botMsg);
+            botMessage.setText("[" + command.getAlias() + "], error have been happened when it is playing");
+            QueueManager.putBotMsgToResponseQueue(botMessage);
         }
     }
 }

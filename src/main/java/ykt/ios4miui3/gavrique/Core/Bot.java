@@ -31,6 +31,10 @@ public class Bot {
             url += "?";
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 try {
+                    if (entry.getValue() == null) {
+                        continue;
+                    }
+
                     url += entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8") + "&";
                 } catch (UnsupportedEncodingException e) {
                     Logger.get().error("Bad param value:" + entry.getValue());

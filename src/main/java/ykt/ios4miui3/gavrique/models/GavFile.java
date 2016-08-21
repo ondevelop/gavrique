@@ -91,6 +91,30 @@ public class GavFile {
         return list;
     }
 
+    public static List<GavFile> searchByAlias(String alias) {
+        Connection connection = null;
+        List<GavFile> list = new ArrayList<>();
+        try {
+            connection = Db.getConnection();
+            PreparedStatement st = connection.prepareStatement("select id, created, author, alias, path from gav_files where alias LIKE ?");
+            st.setString(1, "%" + alias + "%");
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                GavFile gavFile = new GavFile(rs.getString(3), rs.getString(4), rs.getString(5));
+                gavFile.setId(rs.getInt(1));
+                gavFile.setCreated(new Date(rs.getLong(2)));
+                list.add(gavFile);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            Logger.get().error("save error", e);
+        } finally {
+            Db.closeConnection(connection);
+        }
+        return list;
+    }
+
     public void save() {
         Connection connection = null;
         try {
