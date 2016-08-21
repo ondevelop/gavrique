@@ -16,7 +16,8 @@ public class Bot {
     public static final String HELP_TEXT = "HOW TO SAVE VOICE/AUDIO: send me in private chat a voice/audio, send alias of voice/audio \n" +
             "HOW TO PLAY: send `/play[alias]` in group or `play[alias]` in private chat \n" +
             "HOW TO REMOVE: send `/remove [alias]` in group or in private chat \n" +
-            "LIST OF COMMANDS: /list";
+            "LIST OF COMMANDS: /list \n" +
+            "RANDOM : /random or random";
 
     public static final String API_URL = "https://api.telegram.org";
 
